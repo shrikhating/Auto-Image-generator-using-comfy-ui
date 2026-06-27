@@ -1,18 +1,18 @@
-# 🎨 LinkedIn Image Generator — Ollama + ComfyUI AI Image Pipeline
+# 🔗 LinkedIn AI Content Engine — Automated Educational Post & Image Pipeline
 
 <div align="center">
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![n8n](https://img.shields.io/badge/n8n-EA4B71?style=for-the-badge&logo=n8n&logoColor=white)
 ![Ollama](https://img.shields.io/badge/Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white)
-![ComfyUI](https://img.shields.io/badge/ComfyUI-6E3AFA?style=for-the-badge&logoColor=white)
-![Stable Diffusion](https://img.shields.io/badge/Stable%20Diffusion-FF6B35?style=for-the-badge&logoColor=white)
+![ComfyUI](https://img.shields.io/badge/ComfyUI%20%7C%20Stable%20Diffusion-6E3AFA?style=for-the-badge&logo=stablediffusion&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 
-**LLM-Driven Prompt Engineering → Advanced Stable Diffusion Pipeline → 1344×768 LinkedIn Images**  
-_Ollama generates structured prompt JSON · ComfyUI hires-fix pipeline produces final image_
+**End-to-End Automated LinkedIn Post Engine: Topic → Copy → AI Image → Post**  
+_Random Topic Selection → Ollama LLM → Stable Diffusion (ComfyUI) → LinkedIn_
 
 ![Status](https://img.shields.io/badge/Status-Operational-brightgreen?style=flat-square)
-![Resolution](https://img.shields.io/badge/Output-1344×768-blue?style=flat-square)
-![Pipeline](https://img.shields.io/badge/Pipeline-Hires--Fix%20Advanced-orange?style=flat-square)
+![Domain](https://img.shields.io/badge/Domain-Content%20Automation%20%7C%20GenAI-blue?style=flat-square)
+![Pipeline](https://img.shields.io/badge/Pipeline-n8n%20%7C%20Local%20AI-orange?style=flat-square)
 
 </div>
 
@@ -20,12 +20,9 @@ _Ollama generates structured prompt JSON · ComfyUI hires-fix pipeline produces 
 
 ## 📋 Overview
 
-The **LinkedIn Image Generator** is a Python pipeline that converts a text topic into a production-ready 1344×768 LinkedIn post image by chaining two local AI systems:
+The **LinkedIn AI Content Engine** is a fully automated pipeline that produces and publishes educational LinkedIn posts — from topic selection through AI-generated post copy and image generation — without manual intervention.
 
-1. **Ollama LLM** — receives a topic and returns a structured JSON object containing a `positive` Stable Diffusion prompt, a `negative` prompt, and a `style_preset` art direction tag.
-2. **ComfyUI with Stable Diffusion** — executes an advanced hires-fix generation pipeline using the LLM-constructed prompt to produce the final image at 1344×768.
-
-All configuration is externalized to `config.json`. The `sanitize_url()` utility handles URL schema and address normalization to prevent connection errors when Ollama or ComfyUI endpoint strings are malformed.
+The pipeline is orchestrated by **n8n** (self-hosted workflow automation), uses **Ollama** for local LLM post content generation, and **ComfyUI with Stable Diffusion** for AI image generation at 1344×768 resolution. Topics are randomly selected from a configurable bank, ensuring content diversity across automation runs.
 
 ---
 
@@ -33,69 +30,69 @@ All configuration is externalized to `config.json`. The `sanitize_url()` utility
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│           LinkedIn Image Generator — Two-Stage AI Pipeline                   │
+│          LinkedIn AI Content Engine — Automation Pipeline                    │
 └─────────────────────────────────────────────────────────────────────────────┘
 
   ┌──────────────────────────────────┐
-  │   INPUT                          │
-  │   ─ topic: str                   │
-  │     ("IIoT predictive           │
-  │      maintenance" etc.)          │
+  │   TRIGGER                        │
+  │   ─ n8n Schedule Node            │
+  │     (cron: configurable cadence) │
   └──────────────┬───────────────────┘
                  │
                  ▼
-  ┌──────────────────────────────────────────────────────────────┐
-  │  STAGE 1 — PROMPT ENGINEERING (Ollama LLM)                   │
-  │                                                              │
-  │  sanitize_url(config["ollama"]["endpoint"])                  │
-  │    └─ Normalizes schema prefix (http:// / https://)         │
-  │    └─ Fixes IP/hostname formatting                          │
-  │    └─ Ensures no trailing slash conflicts                    │
-  │                                                              │
-  │  POST → {sanitized_endpoint}/api/generate                    │
-  │  Payload:                                                    │
-  │  {                                                           │
-  │    "model": "llama3.1:8b",                                  │
-  │    "prompt": "Return JSON only. No preamble. No markdown.   │
-  │      Fields: positive (SD prompt), negative (SD negative),  │
-  │      style_preset (art style tag). Topic: {topic}",         │
-  │    "stream": false                                           │
-  │  }                                                           │
-  │                                                              │
-  │  Multi-strategy JSON parse on response:                     │
-  │  Strategy 1: json.loads(raw_response)                       │
-  │  Strategy 2: regex extract {...} block                      │
-  │  Strategy 3: key-value reconstruction from partial output   │
-  │                                                              │
-  │  Output: {"positive": "...", "negative": "...",             │
-  │           "style_preset": "..."}                            │
-  └──────────────────────────────────────────────────────────────┘
-                 │ Structured prompt JSON
+  ┌──────────────────────────────────┐
+  │   TOPIC SELECTION                │
+  │   ─ Random pick from topic bank  │
+  │     (JSON array in n8n config)   │
+  │   ─ Topics: IIoT, AI/ML, Python, │
+  │     Data Engineering, Industry   │
+  │     4.0, Power BI, Cloud, etc.   │
+  └──────────────┬───────────────────┘
+                 │ Selected topic
                  ▼
   ┌──────────────────────────────────────────────────────────────┐
-  │  STAGE 2 — IMAGE GENERATION (ComfyUI / Stable Diffusion)    │
+  │   POST COPY GENERATION (Ollama — Local LLM)                  │
   │                                                              │
-  │  Workflow template loaded from workflow_template.json        │
+  │   ─ n8n HTTP Request Node → POST localhost:11434/api/generate│
+  │   ─ Prompt: structured template per post format              │
+  │     · Hook line (attention-grabbing opener)                  │
+  │     · 5-7 educational bullet points                          │
+  │     · Call-to-action                                         │
+  │     · 10–15 relevant hashtags                                │
+  │   ─ Response: formatted LinkedIn post copy                   │
+  └──────────────────────────────────────────────────────────────┘
+                 │ Post copy text
+                 ▼
+  ┌──────────────────────────────────────────────────────────────┐
+  │   IMAGE PROMPT GENERATION (Ollama — Structured JSON)         │
   │                                                              │
-  │  Prompt injection into workflow nodes:                       │
-  │  ─ KSampler positive input ← style_preset + ", " + positive │
-  │  ─ KSampler negative input ← negative                       │
-  │  ─ EmptyLatentImage: width=1344, height=768                 │
+  │   ─ Second Ollama call requesting JSON-only output           │
+  │   ─ Returns:                                                 │
+  │     · "positive": detailed SD prompt for the image           │
+  │     · "negative": negative prompt (what to avoid)           │
+  │     · "style_preset": art style tag                          │
+  │   ─ sanitize_url() applied to Ollama endpoint               │
+  │     (schema + address correction)                            │
+  └──────────────────────────────────────────────────────────────┘
+                 │ Structured image prompt JSON
+                 ▼
+  ┌──────────────────────────────────────────────────────────────┐
+  │   IMAGE GENERATION (ComfyUI — Stable Diffusion)              │
   │                                                              │
-  │  Advanced hires-fix pipeline:                               │
-  │  ─ Base generation at lower resolution                      │
-  │  ─ Upscale pass                                             │
-  │  ─ Refiner KSampler pass at 1344×768                        │
-  │                                                              │
-  │  POST workflow → http://localhost:8188/prompt               │
-  │  ─ Response: {"prompt_id": "uuid"}                          │
-  │                                                              │
-  │  Poll loop: GET /history/{prompt_id}                        │
-  │  ─ Check until status "completed"                           │
-  │  ─ Extract output image filename                            │
-  │  ─ Download image from /view endpoint                       │
-  │                                                              │
-  │  Output: 1344×768 PNG saved to ./output/{timestamp}.png     │
+  │   ─ ComfyUI advanced pipeline with hires-fix                 │
+  │   ─ Resolution: 1344×768 (landscape, LinkedIn-optimized)     │
+  │   ─ Positive / negative prompts injected                     │
+  │   ─ style_preset token prepended to positive prompt          │
+  │   ─ Python script POSTs workflow JSON to ComfyUI API         │
+  │     (localhost:8188)                                         │
+  │   ─ Polls ComfyUI /history endpoint until image ready        │
+  └──────────────────────────────────────────────────────────────┘
+                 │ Generated image (PNG/JPEG)
+                 ▼
+  ┌──────────────────────────────────────────────────────────────┐
+  │   LINKEDIN POST ASSEMBLY & PUBLISHING                        │
+  │   ─ n8n LinkedIn node: post copy + image combined           │
+  │   ─ Scheduled or manual trigger publish                      │
   └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -105,74 +102,79 @@ All configuration is externalized to `config.json`. The `sanitize_url()` utility
 
 | Component | Technology | Purpose |
 |---|---|---|
-| **Language** | Python | Pipeline orchestration |
-| **LLM** | Ollama (local) | Structured prompt JSON generation from topic |
-| **Image Generation** | ComfyUI | Stable Diffusion API server with workflow execution |
-| **SD Model** | Stable Diffusion (ComfyUI checkpoint) | Advanced hires-fix image generation |
-| **URL Normalization** | `sanitize_url()` (custom utility) | Endpoint string normalization before API calls |
-| **Config** | `config.json` | All settings externalized from code |
-| **HTTP Client** | Python `requests` | Ollama and ComfyUI API calls |
+| **Orchestration** | n8n (self-hosted) | End-to-end workflow automation with visual node editor |
+| **LLM (Post Copy)** | Ollama (local) | LinkedIn post copy generation from topic prompt |
+| **LLM (Image Prompt)** | Ollama (local) | Structured JSON image prompt generation |
+| **Image Generation** | ComfyUI + Stable Diffusion | 1344×768 AI image generation with hires-fix pipeline |
+| **Config** | `config.json` | All pipeline settings externalized |
+| **Language** | Python | ComfyUI API client, image polling, sanitize_url utility |
 
 ---
 
 ## ✨ Key Features
 
-### 🧠 LLM Prompt Engineering (Ollama)
-- Topic-to-structured-prompt in a single Ollama call
-- Response is strictly constrained to JSON-only output (no preamble, no markdown fences)
-- Three-strategy parser handles all common model output deviations:
-  - **Strategy 1**: Clean `json.loads()` on raw response
-  - **Strategy 2**: Regex `{...}` block extraction from responses with surrounding text
-  - **Strategy 3**: Key-by-key reconstruction when model returns partial/malformed JSON
+### 🎲 Random Topic Selection
+- Topic bank maintained as a JSON array in n8n workflow configuration
+- Topics span: IIoT, Industry 4.0, Python, AI/ML, Power BI, Data Engineering, Cloud Architecture, Automation
+- Random selection node ensures no post repeats consecutively
 
-### 🔧 `sanitize_url()` Utility
-A utility function that normalizes any Ollama or ComfyUI endpoint string before making API calls:
-```python
-sanitize_url("localhost:11434")      → "http://localhost:11434"
-sanitize_url("http://localhost:11434/") → "http://localhost:11434"
-sanitize_url("192.168.0.5:8188")    → "http://192.168.0.5:8188"
-```
-This prevents `MissingSchema`, `InvalidSchema`, and double-slash URL errors — a common failure point when config values are edited without schema prefix.
+### ✍️ Structured LinkedIn Post Generation (Ollama)
+- Prompt template enforces LinkedIn post format:
+  - **Hook** — attention-grabbing first line
+  - **Body** — 5–7 educational insights or tips
+  - **CTA** — call-to-action for engagement
+  - **Hashtags** — 10–15 relevant tags for discoverability
 
-### 🎨 ComfyUI Advanced Hires-Fix Pipeline
-- **Base pass**: generates image at a lower resolution for speed
-- **Upscale pass**: scales base result up to 1344×768 using ESRGAN or latent upscaler
-- **Refiner pass**: second KSampler run at full 1344×768 for sharpness and detail
-- Workflow executed as ComfyUI API JSON — no ComfyUI UI interaction required
+### 🖼️ AI Image Prompt Pipeline (Ollama → Stable Diffusion)
+- Ollama second call requests **JSON-only structured output** with three fields:
+  - `positive`: detailed Stable Diffusion prompt matching the post topic
+  - `negative`: what to avoid (artifacts, blur, text errors)
+  - `style_preset`: art style tag (e.g., `cyberpunk`, `isometric`, `flat design`)
+- `sanitize_url()` utility normalizes the Ollama API URL (handles schema prefix, address formatting)
+- Structured JSON parsed by Python and injected into ComfyUI workflow node inputs
 
-### 📐 LinkedIn-Optimized Output (1344×768)
-- Horizontal format optimized for LinkedIn post image card display
-- PNG output at full resolution suitable for upload without additional resizing
+### 🎨 ComfyUI Advanced Pipeline
+- Full hires-fix pipeline: base generation + upscale + refiner pass
+- Output resolution: **1344×768** (horizontal, optimized for LinkedIn post image dimensions)
+- `style_preset` token prepended to positive prompt to steer art direction
+- Python polls ComfyUI `/history/{prompt_id}` until output image is available
+
+### 🔁 n8n Workflow Orchestration
+- All steps connected as n8n nodes with error handling branches
+- HTTP Request nodes for Ollama API calls
+- Custom code node for JSON parsing and image prompt construction
+- LinkedIn integration node for final post submission
+- Schedule-based auto-trigger (configurable cadence)
 
 ---
 
 ## 🔄 Pipeline Workflow
 
 ```
-INPUT: topic = "Industry 4.0 predictive maintenance"
+TRIGGER (n8n Schedule / Manual)
+      │
+      ▼
+TOPIC SELECT
+  └─ Random item from topic bank JSON array
 
-STAGE 1 — PROMPT ENGINEERING
-  └─ sanitize_url() → endpoint normalized
-  └─ Ollama API call: topic → structured JSON
-  └─ Multi-strategy JSON parse
-  └─ Output:
-       positive: "futuristic factory floor, holographic displays, 
-                  glowing sensor nodes, blue ambient lighting, 
-                  isometric view, ultra-detailed, 4K"
-       negative: "blurry, text errors, watermark, low quality"
-       style_preset: "cyberpunk industrial"
+POST COPY (Ollama Call 1)
+  └─ Prompt: "Write a LinkedIn educational post about {topic} with hook, bullets, CTA, hashtags"
+  └─ Returns: formatted post text
 
-STAGE 2 — IMAGE GENERATION
-  └─ Load workflow_template.json
-  └─ Inject: positive = style_preset + ", " + positive
-  └─ Inject: negative → negative KSampler node
-  └─ Set: EmptyLatentImage width=1344, height=768
-  └─ POST to ComfyUI /prompt
-  └─ Poll /history/{prompt_id} until complete
+IMAGE PROMPT (Ollama Call 2)
+  └─ Prompt: "Return JSON only: {positive, negative, style_preset} for a LinkedIn image about {topic}"
+  └─ sanitize_url() applied to endpoint before call
+  └─ Multi-strategy JSON parse → extract fields
+
+IMAGE GENERATE (ComfyUI API)
+  └─ Inject positive + negative into workflow JSON KSampler nodes
+  └─ POST workflow to http://localhost:8188/prompt
+  └─ Poll /history/{id} until status = 'complete'
   └─ Download output image
-  └─ Save: output/20260626_143022.png
 
-OUTPUT: 1344×768 PNG — LinkedIn-ready
+PUBLISH (n8n LinkedIn Node)
+  └─ Post copy + image assembled
+  └─ LinkedIn API call submits the post
 ```
 
 ---
@@ -180,14 +182,19 @@ OUTPUT: 1344×768 PNG — LinkedIn-ready
 ## 📁 Project Structure
 
 ```
-linkedin_image_generator/
-├── main.py                        # Pipeline entry point
-├── prompt_engineer.py             # Ollama call + multi-strategy JSON parser
-├── comfy_client.py                # ComfyUI API: submit workflow + poll + download
-├── sanitize_url.py                # URL schema/address normalization utility
-├── workflow_template.json         # ComfyUI advanced hires-fix workflow JSON
-├── config.json                    # All configuration externalized
-├── output/                        # Generated images (timestamped PNG)
+linkedin_content_engine/
+├── n8n/
+│   └── workflow.json              # Exported n8n workflow (importable)
+├── comfyui/
+│   ├── comfy_client.py            # ComfyUI API client — submit + poll
+│   ├── workflow_template.json     # ComfyUI pipeline JSON template
+│   └── sanitize_url.py            # URL schema/address normalization utility
+├── prompts/
+│   ├── post_prompt_template.txt   # LinkedIn post generation prompt
+│   └── image_prompt_template.txt  # Structured image prompt generation prompt
+├── topics/
+│   └── topic_bank.json            # Topic array for random selection
+├── config.json                    # All settings externalized
 └── requirements.txt
 ```
 
@@ -199,20 +206,21 @@ linkedin_image_generator/
 {
   "ollama": {
     "endpoint": "http://localhost:11434",
-    "model": "llama3.1:8b",
-    "stream": false
+    "post_model": "llama3.1:8b",
+    "image_prompt_model": "llama3.1:8b"
   },
   "comfyui": {
     "endpoint": "http://localhost:8188",
+    "output_width": 1344,
+    "output_height": 768,
     "poll_interval_seconds": 3,
     "max_poll_attempts": 60
   },
-  "output": {
-    "width": 1344,
-    "height": 768,
-    "format": "png",
-    "directory": "./output"
-  }
+  "post": {
+    "hashtag_count": 12,
+    "bullet_count": 6
+  },
+  "output_dir": "./generated"
 }
 ```
 
@@ -222,33 +230,37 @@ linkedin_image_generator/
 
 ### Prerequisites
 
-- Python 3.10+
+- n8n installed and running (`npx n8n`)
 - Ollama running locally with `llama3.1:8b` pulled
-- ComfyUI installed and running with a Stable Diffusion checkpoint loaded
-- ComfyUI: Advanced hires-fix workflow configured in `workflow_template.json`
+- ComfyUI installed with Stable Diffusion checkpoint
+- LinkedIn Developer App credentials (for n8n LinkedIn node)
 
-### Installation
+### Setup
 
 ```bash
-git clone https://github.com/shrikhating/linkedin-image-generator.git
-cd linkedin_image_generator
+git clone https://github.com/shrikhating/linkedin-content-engine.git
+cd linkedin_content_engine
 pip install -r requirements.txt
+
+# Import n8n workflow
+# n8n UI → Import Workflow → select n8n/workflow.json
 ```
 
-### Run
+### Run Manually
 
 ```bash
-python main.py --topic "Python asyncio for beginners"
-```
+# Test ComfyUI client directly
+python comfyui/comfy_client.py --topic "IIoT predictive maintenance"
 
-Output saved to: `output/YYYYMMDD_HHMMSS.png`
+# Or trigger the full n8n workflow manually from n8n dashboard
+```
 
 ---
 
 ## 👤 Author
 
 **Shrikant Khating**  
-Senior BI Developer | AI Automation Engineer | Python Developer  
+Senior BI Developer | AI Automation Engineer | Content Intelligence  
 📧 shri.khating@gmail.com  
 🔗 [LinkedIn](https://linkedin.com/in/shrikant-khating) · [GitHub](https://github.com/shrikhating)
 
